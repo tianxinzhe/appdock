@@ -1,0 +1,21 @@
+# IDE / 工具目录
+.trae/
+.screenshots/
+.idea/
+.vscode/
+
+# Gradle
+.gradle/
+build/
+local.properties
+
+# Android
+captures/
+.externalNativeBuild/
+.cxx/
+*.apk
+*.aab
+
+# 系统文件
+.DS_Store
+Thumbs.db
