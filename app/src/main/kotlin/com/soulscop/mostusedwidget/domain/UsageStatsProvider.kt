@@ -53,6 +53,7 @@ class UsageStatsProvider(private val context: Context) {
         }
     }
 
+    @Suppress("DEPRECATION")
     private fun countLaunches(start: Long, end: Long, onEvent: (String) -> Unit) {
         val events = runCatching { usm.queryEvents(start, end) }.getOrNull() ?: return
         val e = UsageEvents.Event()
