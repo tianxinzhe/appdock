@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">AppDock</string>
+
+    <!-- Permission -->
+    <string name="permission_title">需要「使用情况访问」权限</string>
+    <string name="permission_description">本应用仅在本机读取应用使用统计，用于计算最常用应用并在桌面小组件快捷启动。所有数据仅保存在本地，绝不上传服务器，也不会展示任何广告。</string>
+    <string name="permission_open_settings">前往开启权限</string>
+    <string name="permission_recheck">已开启，重新检测</string>
+
+    <!-- Tabs -->
+    <string name="tab_stats">榜单</string>
+    <string name="tab_widget">小组件</string>
+    <string name="tab_settings">设置</string>
+
+    <!-- Stats -->
+    <string name="stats_title">应用热度榜单</string>
+    <string name="stats_empty">暂无使用数据，请点击右上角刷新</string>
+    <string name="stats_refresh">刷新</string>
+    <string name="stats_launch_summary">7天 %1$d 次 · 30天 %2$d 次</string>
+    <string name="stats_foreground_7d">7天前台 %1$s</string>
+    <string name="duration_hours">%1$d 小时 %2$d 分</string>
+    <string name="duration_minutes">%1$d 分钟</string>
+    <string name="action_hide">隐藏</string>
+    <string name="action_pin">置顶</string>
+    <string name="action_unpin">取消置顶</string>
+
+    <!-- Widget -->
+    <string name="widget_title">桌面小组件</string>
+    <string name="widget_preview">效果预览</string>
+    <string name="widget_add_hint">长按桌面空白处 → 小组件 → 找到「AppDock」添加</string>
+    <string name="widget_customize_hint">高级版可自定义图标数量（4/6/8）、颜色、排序等</string>
+    <string name="widget_no_permission">请在系统设置中开启使用情况访问</string>
+    <string name="widget_no_data">暂无使用数据</string>
+    <string name="widget_refresh">刷新</string>
+
+    <!-- Settings -->
+    <string name="settings_title">设置</string>
+    <string name="settings_sort_mode">排序模式</string>
+    <string name="sort_launch_count">启动次数</string>
+    <string name="sort_foreground_time">前台时长</string>
+    <string name="sort_last_used">最近使用</string>
+    <string name="settings_weight">热度权重</string>
+    <string name="settings_w1">近7天权重</string>
+    <string name="settings_w2">近30天权重</string>
+    <string name="settings_decay">衰减因子（天）</string>
+    <string name="settings_filter">批量过滤</string>
+    <string name="settings_exclude_system">屏蔽系统应用</string>
+    <string name="settings_exclude_games">屏蔽游戏应用</string>
+    <string name="settings_blacklist">黑名单管理</string>
+    <string name="settings_blacklist_empty">暂无隐藏应用</string>
+    <string name="settings_clear_data">清除统计数据</string>
+    <string name="settings_clear_confirm">确认清除全部统计数据？</string>
+    <string name="settings_privacy">隐私政策</string>
+    <string name="settings_purchase">解锁高级版</string>
+    <string name="settings_restore">恢复购买</string>
+    <string name="settings_about">关于</string>
+    <string name="settings_about_content">AppDock · 本地应用使用热度统计与快捷启动</string>
+    <string name="settings_export_csv">导出 CSV</string>
+    <string name="settings_export_done">已导出</string>
+    <string name="settings_export_failed">导出失败</string>
+
+    <!-- Premium -->
+    <string name="premium_title">高级版</string>
+    <string name="premium_description">解锁全部高级功能：自定义权重与排序、批量过滤系统/游戏、CSV 导出、每日自动刷新、小组件自定义（4/6/8 个图标与颜色）。</string>
+    <string name="premium_purchase">立即购买（$1.99）</string>
+    <string name="premium_restored">已恢复购买</string>
+    <string name="premium_active">已解锁高级版</string>
+
+    <!-- Common -->
+    <string name="cancel">取消</string>
+    <string name="confirm">确认</string>
+
+    <!-- Privacy -->
+    <string name="privacy_title">隐私政策</string>
+    <string name="privacy_link">访问官网</string>
+    <string name="privacy_content">AppDock 非常重视你的隐私。\n\n1. 数据本地化：本应用读取的系统「使用情况访问」数据仅用于在设备本地计算应用使用热度，全部统计数据均保存在设备本地数据库中，不会上传到任何服务器。\n\n2. 权限最小化：本应用仅申请「使用情况访问」权限（用于读取使用统计），不申请通讯录、定位、相机、麦克风等敏感权限。\n\n3. 无广告无追踪：本应用不接入任何广告 SDK，也不包含任何用户行为追踪或分析 SDK。\n\n4. 数据控制：你可以在「设置 → 清除统计数据」中随时删除全部本地统计数据；卸载应用也会一并清除所有本地数据。\n\n5. 小组件：桌面小组件仅用于展示与快捷启动高频应用，不收集或上报任何数据。\n\n如有疑问，请访问我们的官方网站。</string>
+</resources>
