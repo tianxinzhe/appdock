@@ -19,7 +19,9 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            // FIX #4: enable R8 shrinking/obfuscation for release builds
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

@@ -2,16 +2,15 @@ package com.soulscop.mostusedwidget.ui.settings
 
 import android.app.Application
 import android.content.Intent
-import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.soulscop.mostusedwidget.MostUsedApp
-import com.soulscop.mostusedwidget.R
 import com.soulscop.mostusedwidget.data.local.SettingsEntity
 import com.soulscop.mostusedwidget.util.CsvExporter
 import com.soulscop.mostusedwidget.widget.MostUsedWidgetProvider
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -31,6 +30,12 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     private var refreshJob: Job? = null
+
+    /**
+     * FIX #9: don't start Activities from a ViewModel with an application context
+     * (background-start restrictions). The UI observes this and launches the chooser.
+     */
+    val csvShareEvent = MutableStateFlow<Intent?>(null)
 
     fun updateSettings(transform: (SettingsEntity) -> SettingsEntity) {
         viewModelScope.launch {
@@ -80,12 +85,9 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                 putExtra(Intent.EXTRA_STREAM, uri)
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
-            val chooser = Intent.createChooser(send, ctx.getString(R.string.settings_export_csv))
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            runCatching { ctx.startActivity(chooser) }
-            Toast.makeText(ctx, R.string.settings_export_done, Toast.LENGTH_SHORT).show()
-        } else {
-            Toast.makeText(ctx, R.string.settings_export_failed, Toast.LENGTH_SHORT).show()
+            csvShareEvent.value = Intent.createChooser(send, null)
         }
     }
+
+    fun onCsvShareConsumed() { csvShareEvent.value = null }
 }

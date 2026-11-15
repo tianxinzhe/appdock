@@ -18,11 +18,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.lifecycleScope
 import com.soulscop.mostusedwidget.ui.permission.PermissionGuideScreen
 import com.soulscop.mostusedwidget.ui.settings.SettingsScreen
@@ -34,32 +35,33 @@ import com.soulscop.mostusedwidget.widget.MostUsedWidgetProvider
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
-    private val permissionGranted = mutableStateOf(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        permissionGranted.value = UsageStatsPermission.hasPermission(this)
-        if (permissionGranted.value) refreshIfEmpty(force = false)
+        // FIX #5: re-check on every ON_RESUME, refresh data after permission granted
         setContent {
             MostUsedWidgetTheme {
-                if (permissionGranted.value) {
+                var permissionGranted by androidx.compose.runtime.remember {
+                    androidx.compose.runtime.mutableStateOf(UsageStatsPermission.hasPermission(this))
+                }
+                var lastGranted by androidx.compose.runtime.remember {
+                    androidx.compose.runtime.mutableStateOf(UsageStatsPermission.hasPermission(this))
+                }
+                LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+                    permissionGranted = UsageStatsPermission.hasPermission(this@MainActivity)
+                    // First grant → fetch data immediately
+                    if (permissionGranted && !lastGranted) refreshIfEmpty(force = true)
+                    lastGranted = permissionGranted
+                }
+                if (permissionGranted) {
                     MainScreen()
                 } else {
-                    PermissionGuideScreen(onCheck = {
-                        permissionGranted.value = UsageStatsPermission.hasPermission(this)
-                    })
+                    PermissionGuideScreen(
+                        onCheck = { permissionGranted = UsageStatsPermission.hasPermission(this) }
+                    )
                 }
             }
         }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        val wasGranted = permissionGranted.value
-        val nowGranted = UsageStatsPermission.hasPermission(this)
-        permissionGranted.value = nowGranted
-        // 首次授权成功后立即抓取一次统计数据
-        if (!wasGranted && nowGranted) refreshIfEmpty(force = true)
     }
 
     private fun refreshIfEmpty(force: Boolean) {
@@ -75,7 +77,8 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MainScreen() {
-    var selectedTab by remember { mutableIntStateOf(0) }
+    // FIX #17: rememberSaveable survives configuration changes (rotation)
+    var selectedTab by rememberSaveable { mutableIntStateOf(0) }
     Scaffold(
         bottomBar = {
             NavigationBar {

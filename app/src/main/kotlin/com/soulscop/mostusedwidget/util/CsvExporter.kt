@@ -8,6 +8,23 @@ import com.soulscop.mostusedwidget.data.local.UsageCacheEntity
 import java.io.File
 
 object CsvExporter {
+
+    /**
+     * Escapes a CSV field per RFC 4180 and neutralizes spreadsheet formula
+     * injection (= + - @ leading chars) with a leading apostrophe.
+     */
+    private fun escape(value: String): String {
+        val sanitized = if (value.isEmpty()) value else {
+            val first = value.first()
+            if (first == '=' || first == '+' || first == '-' || first == '@') {
+                "'$value"
+            } else {
+                value
+            }
+        }
+        return "\"" + sanitized.replace("\"", "\"\"") + "\""
+    }
+
     fun export(context: Context, items: List<UsageCacheEntity>): Uri? = runCatching {
         val dir = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS) ?: return null
         val file = File(dir, "mostused_stats.csv")
@@ -19,8 +36,18 @@ object CsvExporter {
         val sb = StringBuilder()
         sb.appendLine("packageName,appLabel,launchCount7d,launchCount30d,foregroundTime7d,foregroundTime30d,lastUsedTime,score")
         for (it in items) {
-            val label = it.appLabel.replace("\"", "\"\"")
-            sb.appendLine("${it.packageName},\"$label\",${it.launchCount7d},${it.launchCount30d},${it.foregroundTime7d},${it.foregroundTime30d},${it.lastUsedTime},${it.score}")
+            sb.appendLine(
+                listOf(
+                    escape(it.packageName),
+                    escape(it.appLabel),
+                    it.launchCount7d.toString(),
+                    it.launchCount30d.toString(),
+                    it.foregroundTime7d.toString(),
+                    it.foregroundTime30d.toString(),
+                    it.lastUsedTime.toString(),
+                    it.score.toString()
+                ).joinToString(",")
+            )
         }
         return sb.toString()
     }

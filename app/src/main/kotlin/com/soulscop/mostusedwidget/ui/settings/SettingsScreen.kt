@@ -19,6 +19,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -26,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -41,6 +43,17 @@ fun SettingsScreen(viewModel: SettingsViewModel = viewModel()) {
 
     var showPrivacy by remember { mutableStateOf(false) }
     var showClearConfirm by remember { mutableStateOf(false) }
+
+    val csvShareEvent by viewModel.csvShareEvent.collectAsState()
+    val context = LocalContext.current
+
+    // FIX #9: Activity launched from the UI layer, not the ViewModel
+    LaunchedEffect(csvShareEvent) {
+        csvShareEvent?.let { intent ->
+            runCatching { context.startActivity(intent) }
+            viewModel.onCsvShareConsumed()
+        }
+    }
 
     if (showPrivacy) {
         PrivacyPolicyScreen(onBack = { showPrivacy = false })

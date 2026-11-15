@@ -3,7 +3,6 @@ package com.soulscop.mostusedwidget.widget
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
 import android.graphics.Color
 import android.view.View
 import android.widget.RemoteViews
@@ -61,24 +60,27 @@ object WidgetRenderer {
         views.setViewVisibility(R.id.widget_title, if (showTitle) View.VISIBLE else View.GONE)
 
         val count = if (hasPermission) top.size.coerceAtMost(config.iconCount).coerceAtMost(containerIds.size) else 0
-        val iconPx = (config.iconSizeDp * context.resources.displayMetrics.density).toInt().coerceAtLeast(1)
 
         for (i in containerIds.indices) {
             if (i < count) {
                 val item = top[i]
+                // FIX #1: PendingIntent must be set BEFORE content updates on some OEMs
+                val pi = WidgetUtils.launchPendingIntent(context, item.packageName, widgetId * 100 + i)
+                views.setOnClickPendingIntent(containerIds[i], pi)
+
                 views.setViewVisibility(containerIds[i], View.VISIBLE)
                 views.setTextColor(labelIds[i], config.textColor)
                 views.setTextViewText(labelIds[i], item.appLabel)
                 val drawable = resolver.resolveIcon(item.packageName)
                 if (drawable != null) {
-                    val bitmap: Bitmap = WidgetUtils.drawableToBitmap(drawable)
-                    val scaled = Bitmap.createScaledBitmap(bitmap, iconPx, iconPx, true)
-                    views.setImageViewBitmap(iconIds[i], scaled)
+                    // dpi-aware scaling with target size (replaces remote's manual rescale)
+                    views.setImageViewBitmap(
+                        iconIds[i],
+                        WidgetUtils.drawableToBitmap(drawable, config.iconSizeDp, context)
+                    )
                 } else {
                     views.setImageViewResource(iconIds[i], R.drawable.ic_app_placeholder)
                 }
-                val pi = WidgetUtils.launchPendingIntent(context, item.packageName, widgetId * 100 + i)
-                views.setOnClickPendingIntent(containerIds[i], pi)
             } else {
                 views.setViewVisibility(containerIds[i], View.GONE)
             }

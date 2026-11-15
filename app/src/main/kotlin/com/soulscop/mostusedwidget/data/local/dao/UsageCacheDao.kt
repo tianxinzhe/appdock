@@ -18,6 +18,10 @@ interface UsageCacheDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertAll(items: List<UsageCacheEntity>)
 
+    // Diff-delete: keep transaction atomic without clearing the whole table (#10)
+    @Query("DELETE FROM usage_cache WHERE packageName NOT IN (:packages)")
+    suspend fun deleteNotIn(packages: List<String>)
+
     @Query("DELETE FROM usage_cache")
     suspend fun clear()
 }

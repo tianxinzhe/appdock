@@ -10,9 +10,13 @@ class RefreshWorker(context: Context, params: WorkerParameters) : CoroutineWorke
     override suspend fun doWork(): Result {
         val app = applicationContext as MostUsedApp
         val settings = app.configRepository.getSettings()
-        if (!settings.isPremium || !settings.autoRefreshEnabled) return Result.success()
-        app.usageStatsRepository.refresh()
-        MostUsedWidgetProvider.requestUpdateAll(applicationContext)
+        // FIX #8: free users' widgets never refreshed before. Free users get
+        // a daily baseline refresh; premium users control it via the toggle.
+        val shouldRefresh = !settings.isPremium || settings.autoRefreshEnabled
+        if (shouldRefresh) {
+            app.usageStatsRepository.refresh()
+            MostUsedWidgetProvider.requestUpdateAll(applicationContext)
+        }
         return Result.success()
     }
 }

@@ -22,9 +22,9 @@
     <string name="duration_hours">%1$d 小时 %2$d 分</string>
     <string name="duration_minutes">%1$d 分钟</string>
     <string name="action_hide">隐藏</string>
-    <string name="action_unhide">取消隐藏</string>
     <string name="action_pin">置顶</string>
     <string name="action_unpin">取消置顶</string>
+    <string name="action_unhide">取消隐藏</string>
 
     <!-- Widget -->
     <string name="widget_title">桌面小组件</string>

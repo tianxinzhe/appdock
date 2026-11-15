@@ -46,9 +46,11 @@ class UsageStatsRepository(
                 )
             }
 
+        // FIX #10: replace-all + delete-diff inside one transaction so UI flows
+        // never observe an empty intermediate state (no list flash).
         db.withTransaction {
-            db.usageCacheDao().clear()
             db.usageCacheDao().upsertAll(entities)
+            db.usageCacheDao().deleteNotIn(entities.map { it.packageName })
         }
     }
 }

@@ -13,6 +13,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 data class HeatItem(
     val entity: UsageCacheEntity,
@@ -28,6 +30,8 @@ class StatsViewModel(application: Application) : AndroidViewModel(application) {
     val premium: StateFlow<Boolean> = app.premiumState.isPremium
 
     val isRefreshing = MutableStateFlow(false)
+
+    private val pinMutex = Mutex()
 
     val heatList: StateFlow<List<HeatItem>> = combine(
         app.database.usageCacheDao().observeAll(),
@@ -49,6 +53,7 @@ class StatsViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             isRefreshing.value = true
             app.usageStatsRepository.refresh()
+            // FIX #19: app refresh also updates widgets, they showed stale data before
             MostUsedWidgetProvider.requestUpdateAll(getApplication())
             isRefreshing.value = false
         }
@@ -60,8 +65,11 @@ class StatsViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun pin(packageName: String) = viewModelScope.launch {
-        val order = app.configRepository.getPinnedList().size
-        app.configRepository.pinApp(packageName, order)
+        // FIX #18: mutex prevents duplicate sortOrder when pinning quickly
+        pinMutex.withLock {
+            val order = app.configRepository.getPinnedList().size
+            app.configRepository.pinApp(packageName, order)
+        }
         MostUsedWidgetProvider.requestUpdateAll(getApplication())
     }
 
