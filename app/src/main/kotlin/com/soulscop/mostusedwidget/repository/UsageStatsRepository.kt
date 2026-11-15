@@ -8,6 +8,8 @@ import com.soulscop.mostusedwidget.domain.AppFilter
 import com.soulscop.mostusedwidget.domain.AppInfoResolver
 import com.soulscop.mostusedwidget.domain.ScoreCalculator
 import com.soulscop.mostusedwidget.domain.UsageStatsProvider
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class UsageStatsRepository(
     private val context: Context,
@@ -16,8 +18,8 @@ class UsageStatsRepository(
     private val resolver: AppInfoResolver,
     private val config: ConfigRepository
 ) {
-    suspend fun refresh() {
-        if (!provider.hasPermission()) return
+    suspend fun refresh() = withContext(Dispatchers.IO) {
+        if (!provider.hasPermission()) return@withContext
         val raw = provider.collect()
         val settings = config.getSettings()
         val hidden = config.getHiddenPackages()

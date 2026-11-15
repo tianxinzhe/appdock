@@ -91,6 +91,18 @@ fun SettingsScreen(viewModel: SettingsViewModel = viewModel()) {
             viewModel.updateSettings { it.copy(excludeGames = v) }
         }
 
+        SectionTitle(stringResource(R.string.settings_automation))
+        SwitchSetting(stringResource(R.string.settings_auto_refresh), settings.autoRefreshEnabled, isPremium) { v ->
+            viewModel.updateSettings { it.copy(autoRefreshEnabled = v) }
+        }
+        if (!isPremium) {
+            Text(
+                stringResource(R.string.settings_auto_refresh_hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
         SectionTitle(stringResource(R.string.settings_blacklist))
         if (hiddenApps.isEmpty()) {
             Text(stringResource(R.string.settings_blacklist_empty), style = MaterialTheme.typography.bodySmall)
@@ -98,7 +110,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = viewModel()) {
             hiddenApps.forEach { pkg ->
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(pkg, modifier = Modifier.weight(1f), maxLines = 1)
-                    TextButton(onClick = { viewModel.unhide(pkg) }) { Text(stringResource(R.string.action_unpin)) }
+                    TextButton(onClick = { viewModel.unhide(pkg) }) { Text(stringResource(R.string.action_unhide)) }
                 }
             }
         }

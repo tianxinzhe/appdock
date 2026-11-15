@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.soulscop.mostusedwidget.MostUsedApp
 import com.soulscop.mostusedwidget.data.local.SettingsEntity
 import com.soulscop.mostusedwidget.data.local.UsageCacheEntity
+import com.soulscop.mostusedwidget.widget.MostUsedWidgetProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -48,18 +49,31 @@ class StatsViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             isRefreshing.value = true
             app.usageStatsRepository.refresh()
+            MostUsedWidgetProvider.requestUpdateAll(getApplication())
             isRefreshing.value = false
         }
     }
 
-    fun hide(packageName: String) = viewModelScope.launch { app.configRepository.hideApp(packageName) }
+    fun hide(packageName: String) = viewModelScope.launch {
+        app.configRepository.hideApp(packageName)
+        MostUsedWidgetProvider.requestUpdateAll(getApplication())
+    }
 
     fun pin(packageName: String) = viewModelScope.launch {
         val order = app.configRepository.getPinnedList().size
         app.configRepository.pinApp(packageName, order)
+        MostUsedWidgetProvider.requestUpdateAll(getApplication())
     }
 
-    fun unpin(packageName: String) = viewModelScope.launch { app.configRepository.unpinApp(packageName) }
+    fun unpin(packageName: String) = viewModelScope.launch {
+        app.configRepository.unpinApp(packageName)
+        MostUsedWidgetProvider.requestUpdateAll(getApplication())
+    }
 
-    fun purchase() = viewModelScope.launch { app.billingManager.purchase() }
+    fun purchase() = viewModelScope.launch {
+        if (app.billingManager.purchase()) {
+            app.usageStatsRepository.refresh()
+            MostUsedWidgetProvider.requestUpdateAll(getApplication())
+        }
+    }
 }

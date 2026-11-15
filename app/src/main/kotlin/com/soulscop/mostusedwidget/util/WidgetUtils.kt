@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Paint
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 
@@ -17,6 +18,20 @@ object WidgetUtils {
         val canvas = Canvas(bitmap)
         drawable.setBounds(0, 0, canvas.width, canvas.height)
         drawable.draw(canvas)
+        return bitmap
+    }
+
+    /**
+     * 生成带圆角的纯色背景位图。位图按 800x400 设计，配合 fitXY 自适应小组件尺寸。
+     */
+    fun roundedRectBitmap(color: Int, cornerRadiusDp: Int): Bitmap {
+        val width = 800
+        val height = 400
+        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply { this.color = color }
+        val radius = cornerRadiusDp * 2.3f
+        canvas.drawRoundRect(0f, 0f, width.toFloat(), height.toFloat(), radius, radius, paint)
         return bitmap
     }
 

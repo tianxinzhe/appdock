@@ -22,6 +22,7 @@
     <string name="duration_hours">%1$d 小时 %2$d 分</string>
     <string name="duration_minutes">%1$d 分钟</string>
     <string name="action_hide">隐藏</string>
+    <string name="action_unhide">取消隐藏</string>
     <string name="action_pin">置顶</string>
     <string name="action_unpin">取消置顶</string>
 
@@ -33,6 +34,29 @@
     <string name="widget_no_permission">请在系统设置中开启使用情况访问</string>
     <string name="widget_no_data">暂无使用数据</string>
     <string name="widget_refresh">刷新</string>
+    <string name="widget_manage_hint">在桌面添加小组件时可单独设置外观，多个小组件可分别配置</string>
+
+    <!-- Widget config -->
+    <string name="widget_config_title">小组件设置</string>
+    <string name="widget_config_preview">预览</string>
+    <string name="widget_config_icon_count">图标数量</string>
+    <string name="widget_config_appearance">外观</string>
+    <string name="widget_config_bg_color">背景颜色</string>
+    <string name="widget_config_text_color">文字颜色</string>
+    <string name="widget_config_corner">圆角大小</string>
+    <string name="widget_config_icon_size">图标大小</string>
+    <string name="widget_config_template">布局模板</string>
+    <string name="widget_template_standard">标准</string>
+    <string name="widget_template_compact">紧凑</string>
+    <string name="widget_config_save">保存</string>
+    <string name="widget_config_premium_hint">高级版可自定义数量、颜色、圆角、图标大小与模板</string>
+    <string name="widget_count_items">%1$d 个</string>
+    <string name="color_dark">深色</string>
+    <string name="color_black">黑色</string>
+    <string name="color_light">白色</string>
+    <string name="color_blue">蓝色</string>
+    <string name="color_purple">紫色</string>
+    <string name="color_green">绿色</string>
 
     <!-- Settings -->
     <string name="settings_title">设置</string>
@@ -47,6 +71,9 @@
     <string name="settings_filter">批量过滤</string>
     <string name="settings_exclude_system">屏蔽系统应用</string>
     <string name="settings_exclude_games">屏蔽游戏应用</string>
+    <string name="settings_automation">自动刷新</string>
+    <string name="settings_auto_refresh">每日自动刷新</string>
+    <string name="settings_auto_refresh_hint">高级版：每天自动刷新一次统计数据</string>
     <string name="settings_blacklist">黑名单管理</string>
     <string name="settings_blacklist_empty">暂无隐藏应用</string>
     <string name="settings_clear_data">清除统计数据</string>

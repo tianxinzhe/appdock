@@ -23,12 +23,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.lifecycleScope
 import com.soulscop.mostusedwidget.ui.permission.PermissionGuideScreen
 import com.soulscop.mostusedwidget.ui.settings.SettingsScreen
 import com.soulscop.mostusedwidget.ui.stats.HeatListScreen
 import com.soulscop.mostusedwidget.ui.theme.MostUsedWidgetTheme
 import com.soulscop.mostusedwidget.ui.widget.WidgetManageScreen
 import com.soulscop.mostusedwidget.util.UsageStatsPermission
+import com.soulscop.mostusedwidget.widget.MostUsedWidgetProvider
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     private val permissionGranted = mutableStateOf(false)
@@ -36,6 +39,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         permissionGranted.value = UsageStatsPermission.hasPermission(this)
+        if (permissionGranted.value) refreshIfEmpty(force = false)
         setContent {
             MostUsedWidgetTheme {
                 if (permissionGranted.value) {
@@ -51,7 +55,21 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
-        permissionGranted.value = UsageStatsPermission.hasPermission(this)
+        val wasGranted = permissionGranted.value
+        val nowGranted = UsageStatsPermission.hasPermission(this)
+        permissionGranted.value = nowGranted
+        // 首次授权成功后立即抓取一次统计数据
+        if (!wasGranted && nowGranted) refreshIfEmpty(force = true)
+    }
+
+    private fun refreshIfEmpty(force: Boolean) {
+        val app = application as MostUsedApp
+        lifecycleScope.launch {
+            if (force || app.database.usageCacheDao().getAll().isEmpty()) {
+                app.usageStatsRepository.refresh()
+                MostUsedWidgetProvider.requestUpdateAll(this@MainActivity)
+            }
+        }
     }
 }
 

@@ -3,6 +3,8 @@ package com.soulscop.mostusedwidget.widget
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.Color
 import android.view.View
 import android.widget.RemoteViews
 import com.soulscop.mostusedwidget.R
@@ -32,7 +34,7 @@ object WidgetRenderer {
         val resolver = AppInfoResolver(context)
         val hasPermission = UsageStatsPermission.hasPermission(context)
 
-        views.setInt(R.id.widget_root, "setBackgroundColor", config.bgColor)
+        applyBackground(views, config)
 
         val refreshIntent = Intent(context, MostUsedWidgetProvider::class.java).apply {
             action = MostUsedWidgetProvider.ACTION_REFRESH
@@ -51,8 +53,15 @@ object WidgetRenderer {
                 else -> context.getString(R.string.app_name)
             }
         )
+        views.setTextColor(R.id.widget_title, config.textColor)
+        views.setTextColor(R.id.widget_refresh, config.textColor)
+
+        // 紧凑模板隐藏标题，但无权限/无数据提示仍需展示
+        val showTitle = config.templateId == 0 || !hasPermission || top.isEmpty()
+        views.setViewVisibility(R.id.widget_title, if (showTitle) View.VISIBLE else View.GONE)
 
         val count = if (hasPermission) top.size.coerceAtMost(config.iconCount).coerceAtMost(containerIds.size) else 0
+        val iconPx = (config.iconSizeDp * context.resources.displayMetrics.density).toInt().coerceAtLeast(1)
 
         for (i in containerIds.indices) {
             if (i < count) {
@@ -62,7 +71,9 @@ object WidgetRenderer {
                 views.setTextViewText(labelIds[i], item.appLabel)
                 val drawable = resolver.resolveIcon(item.packageName)
                 if (drawable != null) {
-                    views.setImageViewBitmap(iconIds[i], WidgetUtils.drawableToBitmap(drawable))
+                    val bitmap: Bitmap = WidgetUtils.drawableToBitmap(drawable)
+                    val scaled = Bitmap.createScaledBitmap(bitmap, iconPx, iconPx, true)
+                    views.setImageViewBitmap(iconIds[i], scaled)
                 } else {
                     views.setImageViewResource(iconIds[i], R.drawable.ic_app_placeholder)
                 }
@@ -74,5 +85,19 @@ object WidgetRenderer {
         }
 
         return views
+    }
+
+    private fun applyBackground(views: RemoteViews, config: WidgetConfigEntity) {
+        if (config.cornerRadiusDp > 0) {
+            views.setViewVisibility(R.id.widget_bg, View.VISIBLE)
+            views.setImageViewBitmap(
+                R.id.widget_bg,
+                WidgetUtils.roundedRectBitmap(config.bgColor, config.cornerRadiusDp)
+            )
+            views.setInt(R.id.widget_root, "setBackgroundColor", Color.TRANSPARENT)
+        } else {
+            views.setViewVisibility(R.id.widget_bg, View.GONE)
+            views.setInt(R.id.widget_root, "setBackgroundColor", config.bgColor)
+        }
     }
 }

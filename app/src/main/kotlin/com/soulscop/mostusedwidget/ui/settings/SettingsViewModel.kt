@@ -9,6 +9,9 @@ import com.soulscop.mostusedwidget.MostUsedApp
 import com.soulscop.mostusedwidget.R
 import com.soulscop.mostusedwidget.data.local.SettingsEntity
 import com.soulscop.mostusedwidget.util.CsvExporter
+import com.soulscop.mostusedwidget.widget.MostUsedWidgetProvider
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -27,17 +30,43 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         .map { list -> list.map { it.packageName } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+    private var refreshJob: Job? = null
+
     fun updateSettings(transform: (SettingsEntity) -> SettingsEntity) {
         viewModelScope.launch {
             app.configRepository.saveSettings(transform(app.configRepository.getSettings()))
+            scheduleRefresh()
         }
     }
 
-    fun unhide(packageName: String) = viewModelScope.launch { app.configRepository.unhideApp(packageName) }
+    fun unhide(packageName: String) = viewModelScope.launch {
+        app.configRepository.unhideApp(packageName)
+        scheduleRefresh()
+    }
 
-    fun clearData() = viewModelScope.launch { app.configRepository.clearUsageData() }
+    fun clearData() = viewModelScope.launch {
+        app.configRepository.clearUsageData()
+        MostUsedWidgetProvider.requestUpdateAll(getApplication())
+    }
 
-    fun purchase() = viewModelScope.launch { app.billingManager.purchase() }
+    fun purchase() = viewModelScope.launch {
+        if (app.billingManager.purchase()) {
+            app.usageStatsRepository.refresh()
+            MostUsedWidgetProvider.requestUpdateAll(getApplication())
+        }
+    }
+
+    /**
+     * 设置变更会改变过滤/算分结果，做短延迟合并后再重算，避免滑块拖动时频繁刷新。
+     */
+    private fun scheduleRefresh() {
+        refreshJob?.cancel()
+        refreshJob = viewModelScope.launch {
+            delay(600)
+            app.usageStatsRepository.refresh()
+            MostUsedWidgetProvider.requestUpdateAll(getApplication())
+        }
+    }
 
     fun restore() = viewModelScope.launch { app.billingManager.restore() }
 
